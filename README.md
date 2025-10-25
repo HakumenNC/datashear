@@ -1,5 +1,7 @@
 # DataShear
 
+[![codecov](https://codecov.io/github/HakumenNC/datashear/branch/main/graph/badge.svg?token=0JW393HPAY)](https://codecov.io/github/HakumenNC/datashear)
+
 A Python package that allows you to split CSV files
 
 ## Installation
