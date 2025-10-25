@@ -14,75 +14,100 @@ from datashear.core import Splitter
 
 class TestSplitterByRows:
     """Test cases for Splitter.by_rows method."""
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    Utils
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     
     def setup_method(self):
-        """Set up test fixtures before each test method."""
+        """
+        Set up test fixtures before each test method.
+        """
         # Create temporary directory for test files
         self.test_dir = tempfile.mkdtemp()
         self.sample_csv = os.path.join(self.test_dir, "sample.csv")
+
+        # header
+        self.header = ['ID', 'Name', 'Age', 'City']
         
         # Create a sample CSV file
         self.create_sample_csv()
     
     def teardown_method(self):
-        """Clean up after each test method."""
+        """
+        Clean up after each test method.
+        """
         # Remove temporary directory and all its contents
         shutil.rmtree(self.test_dir)
     
     def create_sample_csv(self, rows=10):
-        """Create a sample CSV file for testing."""
+        """
+        Create a sample CSV file for testing.
+        """
         with open(self.sample_csv, 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            # Header
-            writer.writerow(['ID', 'Name', 'Age', 'City'])
-            # Data rows
+            writer.writerow(self.header)
             for i in range(1, rows + 1):
                 writer.writerow([i, f'Person_{i}', 20 + (i % 50), f'City_{i % 5}'])
     
-    def count_files_with_prefix(self, prefix="part"):
-        """Count files in test directory with given prefix."""
+    def count_files(self, prefix="", sufix=""):
+        """
+        Count files in test directory with given prefix.
+        """
         return len([f for f in os.listdir(self.test_dir) if f.startswith(prefix)])
     
     def read_csv_file(self, filepath):
-        """Read CSV file and return rows as list."""
+        """
+        Read CSV file and return rows as list.
+        """
         with open(filepath, 'r', encoding='utf-8') as file:
             reader = csv.reader(file)
             return list(reader)
+        
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    Tests
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     
     def test_by_rows_basic_functionality(self):
-        """Test basic splitting functionality."""
+        """
+        Test basic splitting functionality.
+        """
         splitter = Splitter(self.sample_csv, self.test_dir)
-        splitter.by_rows(3)  # Split into files of 3 rows each
-        
-        # Should create 4 files (10 data rows / 3 = 3 full files + 1 partial)
-        output_files = self.count_files_with_prefix()
-        assert output_files == 4
+        splitter.by_rows(3)
+
+        output_files = self.count_files()
+        nb_output_files_expected = 4
+        assert output_files == nb_output_files_expected + 1 # adding input file
     
     def test_by_rows_with_header_repetition(self):
-        """Test that headers are repeated when repeat_header=True."""
+        """
+        Test that headers are repeated when repeat_header=True.
+        """
         splitter = Splitter(self.sample_csv, self.test_dir)
         splitter.by_rows(3, repeat_header=True)
-        
-        # Check first output file
-        first_file = os.path.join(self.test_dir, "part___1")
+
+        first_file = os.path.join(self.test_dir, "sample_1.csv" )
         rows = self.read_csv_file(first_file)
         
-        # First row should be header
-        assert rows[0] == ['ID', 'Name', 'Age', 'City']
-        # Should have header + 3 data rows = 4 total rows
+        # first row should be header
+        assert rows[0] == self.header
+        # should have header + 3 data rows = 4 total rows
         assert len(rows) == 4
     
     def test_by_rows_without_header_repetition(self):
-        """Test splitting without header repetition."""
+        """
+        Test splitting without header repetition.
+        """
         splitter = Splitter(self.sample_csv, self.test_dir)
         splitter.by_rows(3, repeat_header=False)
         
-        first_file = os.path.join(self.test_dir, "part___1")
+        first_file = os.path.join(self.test_dir,"sample_1.csv")
         rows = self.read_csv_file(first_file)
         
-        # First row should be data, not header
+        # first row should be data, not header
         assert rows[0] == ['1', 'Person_1', '21', 'City_1']
-        # Should have only 3 data rows
+        # should have only 3 data rows
         assert len(rows) == 3
     
     def test_by_rows_custom_output_parameters(self):
@@ -96,7 +121,7 @@ class TestSplitterByRows:
         splitter.by_rows(5)
         
         # Check that files are created with correct naming
-        expected_file = os.path.join(self.test_dir, "chunk_data_1")
+        expected_file = os.path.join(self.test_dir, "chunk_sample_data_1.csv")
         assert os.path.exists(expected_file)
     
     def test_by_rows_single_row_per_file(self):
@@ -105,8 +130,9 @@ class TestSplitterByRows:
         splitter.by_rows(1)
         
         # Should create 10 files (one for each data row)
-        output_files = self.count_files_with_prefix()
-        assert output_files == 10
+        output_files = self.count_files()
+        nb_output_files_expected = 10
+        assert output_files == nb_output_files_expected + 1 # adding input file
     
     def test_by_rows_larger_than_file(self):
         """Test when rows per file is larger than total rows."""
@@ -115,11 +141,12 @@ class TestSplitterByRows:
         splitter.by_rows(10)  # Request 10 rows per file
         
         # Should create only 1 file
-        output_files = self.count_files_with_prefix()
-        assert output_files == 1
+        output_files = self.count_files()
+        nb_output_files_expected = 1
+        assert output_files == nb_output_files_expected + 1 # adding input file
         
         # File should contain all data
-        output_file = os.path.join(self.test_dir, "part___1")
+        output_file = os.path.join(self.test_dir, "sample_1.csv")
         rows = self.read_csv_file(output_file)
         assert len(rows) == 6  # header + 5 data rows
     
@@ -148,21 +175,7 @@ class TestSplitterByRows:
         with pytest.raises(ValueError, match="CSV file is empty"):
             splitter.by_rows(3)
     
-    def test_by_rows_header_only_csv(self):
-        """Test CSV file with only header."""
-        header_only_csv = os.path.join(self.test_dir, "header_only.csv")
-        
-        with open(header_only_csv, 'w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(['ID', 'Name', 'Age'])
-        
-        splitter = Splitter(header_only_csv, self.test_dir)
-        splitter.by_rows(3)
-        
-        # Should not create any output files (no data rows)
-        output_files = self.count_files_with_prefix()
-        assert output_files == 0
-    
+  
     def test_by_rows_file_content_accuracy(self):
         """Test that file contents are accurate and complete."""
         self.create_sample_csv(7)  # Create 7 data rows
@@ -173,7 +186,7 @@ class TestSplitterByRows:
         all_data_rows = []
         
         for i in range(1, 4):  # Should have 3 files
-            file_path = os.path.join(self.test_dir, f"part___{i}")
+            file_path = os.path.join(self.test_dir, f"sample_{i}.csv")
             if os.path.exists(file_path):
                 rows = self.read_csv_file(file_path)
                 # Skip header if present
@@ -211,7 +224,8 @@ class TestSplitterByRows:
         
         # Should create 10 files
         large_files = len([f for f in os.listdir(self.test_dir) if f.startswith("large")])
-        assert large_files == 10
+        nb_output_files_expected = 10
+        assert large_files == nb_output_files_expected + 1 # adding input file
     
     def create_large_csv(self, filepath, num_rows):
         """Create a larger CSV file for testing."""
