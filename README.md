@@ -1,16 +1,30 @@
 # DataShear
 
 [![codecov](https://codecov.io/github/HakumenNC/datashear/branch/main/graph/badge.svg?token=0JW393HPAY)](https://codecov.io/github/HakumenNC/datashear)
+![PyPI - Version](https://img.shields.io/pypi/v/datashear)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/datashear)
+
 
 A Python package that allows you to split CSV files
 
 ## Installation
 
-Coming soon! The package is currently in development.
+```bash
+pip install datashear
+```
 
 ## Usage
 
-Coming soon! The package is currently in development.
+```py
+from datashear import Splitter
+
+# Split by number of rows
+splitter = Splitter("large_file.csv", output_dir="output")
+splitter.by_rows(1000)  # 1000 rows per file
+
+# Split by file size  
+splitter.by_size(1024*1024)  # 1MB per file
+```
 
 ## Development
 
@@ -67,6 +81,10 @@ Build the package:
 ```bash
 python -m build
 ```
+
+## Publish
+
+Publishing with [`twine`](https://github.com/pypa/twine) via [`github-actions`](https://github.com/features/actions) on release
 
 ## License
 
