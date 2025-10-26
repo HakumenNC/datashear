@@ -43,10 +43,23 @@ pytest --cov=src --cov-report=xml
 
 ### Go further
 
-* https://docs.pytest.org/en/stable
-  * [Method and function level setup/teardown](https://docs.pytest.org/en/stable/how-to/xunit_setup.html#method-and-function-level-setup-teardown)
-  * [Asserting with the assert statement](https://docs.pytest.org/en/stable/how-to/assert.html)
-  * [Assertions about expected exceptions](https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions)
+#### pytest
+
+> The pytest framework makes it easy to write small, readable tests, and can scale to support complex functional testing for applications and libraries.
+
+https://docs.pytest.org/en/stable
+
+- [Method and function level setup/teardown](https://docs.pytest.org/en/stable/how-to/xunit_setup.html#method-and-function-level-setup-teardown)
+- [Asserting with the assert statement](https://docs.pytest.org/en/stable/how-to/assert.html)
+- [Assertions about expected exceptions](https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions)
+
+#### Codecov
+
+> Codecov doesn’t just measure code coverage—it helps you improve code quality at every step.
+
+https://about.codecov.io
+
+- https://github.com/codecov/codecov-action
 
 ## Building
 
