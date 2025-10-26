@@ -27,14 +27,28 @@ cd datashear
 pip install -e ".[dev]"
 ```
 
-### Testing
+## Testing
 
-Run tests with:
+> Writing tests means you don’t trust your code.
+
+Running test with [`pytest`](https://docs.pytest.org/en/stable)
+
 ```bash
 pytest
 ```
 
-### Building
+```bash
+pytest --cov=src --cov-report=xml
+```
+
+### Go further
+
+* https://docs.pytest.org/en/stable
+  * [Method and function level setup/teardown](https://docs.pytest.org/en/stable/how-to/xunit_setup.html#method-and-function-level-setup-teardown)
+  * [Asserting with the assert statement](https://docs.pytest.org/en/stable/how-to/assert.html)
+  * [Assertions about expected exceptions](https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions)
+
+## Building
 
 Build the package:
 ```bash

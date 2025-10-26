@@ -1,5 +1,7 @@
 import psutil
 import os
+import csv
+import io
 
 class Util:
 
@@ -29,4 +31,16 @@ class Util:
         parts.append(str(index))
 
         return "_".join(parts) + extension
+
+    @staticmethod
+    def get_row_size(row, writer_buffer=None, writer=None):
+        if writer_buffer is None:
+            writer_buffer = io.StringIO()
+            writer = csv.writer(writer_buffer)
+        else:
+            writer_buffer.seek(0)
+            writer_buffer.truncate(0)
+            
+        writer.writerow(row)
+        return len(writer_buffer.getvalue().encode('utf-8'))
 

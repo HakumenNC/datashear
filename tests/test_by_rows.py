@@ -13,8 +13,6 @@ from datashear.core import Splitter
 
 
 class TestSplitterByRows:
-    """Test cases for Splitter.by_rows method."""
-
 
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     Utils
@@ -65,6 +63,21 @@ class TestSplitterByRows:
             reader = csv.reader(file)
             return list(reader)
         
+    def create_large_csv(self, filepath, num_rows):
+        """Create a larger CSV file for testing."""
+        with open(filepath, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ID', 'Name', 'Age', 'City', 'Country', 'Salary'])
+            for i in range(1, num_rows + 1):
+                writer.writerow([
+                    i, 
+                    f'Person_{i}', 
+                    20 + (i % 50), 
+                    f'City_{i % 10}',
+                    f'Country_{i % 5}',
+                    30000 + (i * 100)
+                ])
+        
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     Tests
     """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -106,12 +119,14 @@ class TestSplitterByRows:
         rows = self.read_csv_file(first_file)
         
         # first row should be data, not header
-        assert rows[0] == ['1', 'Person_1', '21', 'City_1']
-        # should have only 3 data rows
-        assert len(rows) == 3
+        assert rows[0] == self.header
+        # should have only 4 data rows
+        assert len(rows) == 4
     
     def test_by_rows_custom_output_parameters(self):
-        """Test with custom output prefix and suffix."""
+        """
+        Test with custom output prefix and suffix.
+        """
         splitter = Splitter(
             self.sample_csv, 
             self.test_dir, 
@@ -125,7 +140,9 @@ class TestSplitterByRows:
         assert os.path.exists(expected_file)
     
     def test_by_rows_single_row_per_file(self):
-        """Test splitting with 1 row per file."""
+        """
+        Test splitting with 1 row per file.
+        """
         splitter = Splitter(self.sample_csv, self.test_dir)
         splitter.by_rows(1)
         
@@ -135,7 +152,9 @@ class TestSplitterByRows:
         assert output_files == nb_output_files_expected + 1 # adding input file
     
     def test_by_rows_larger_than_file(self):
-        """Test when rows per file is larger than total rows."""
+        """
+        Test when rows per file is larger than total rows.
+        """
         self.create_sample_csv(5)  # Create file with only 5 data rows
         splitter = Splitter(self.sample_csv, self.test_dir)
         splitter.by_rows(10)  # Request 10 rows per file
@@ -151,7 +170,9 @@ class TestSplitterByRows:
         assert len(rows) == 6  # header + 5 data rows
     
     def test_by_rows_invalid_parameters(self):
-        """Test error handling for invalid parameters."""
+        """
+        Test error handling for invalid parameters.
+        """
         splitter = Splitter(self.sample_csv, self.test_dir)
         
         # Test zero rows
@@ -163,7 +184,9 @@ class TestSplitterByRows:
             splitter.by_rows(-5)
     
     def test_by_rows_empty_csv(self):
-        """Test handling of empty CSV file."""
+        """
+        Test handling of empty CSV file.
+        """
         empty_csv = os.path.join(self.test_dir, "empty.csv")
         
         # Create empty CSV
@@ -177,7 +200,9 @@ class TestSplitterByRows:
     
   
     def test_by_rows_file_content_accuracy(self):
-        """Test that file contents are accurate and complete."""
+        """
+        Test that file contents are accurate and complete.
+        """
         self.create_sample_csv(7)  # Create 7 data rows
         splitter = Splitter(self.sample_csv, self.test_dir)
         splitter.by_rows(3)
@@ -201,12 +226,16 @@ class TestSplitterByRows:
         assert all_data_rows[-1] == ['7', 'Person_7', '27', 'City_2']
     
     def test_by_rows_nonexistent_input_file(self):
-        """Test error handling for nonexistent input file."""
+        """
+        Test error handling for nonexistent input file.
+        """
         with pytest.raises(FileNotFoundError):
             Splitter("nonexistent.csv", self.test_dir)
     
     def test_by_rows_creates_output_directory(self):
-        """Test that output directory is created if it doesn't exist."""
+        """
+        Test that output directory is created if it doesn't exist.
+        """
         new_output_dir = os.path.join(self.test_dir, "new_output")
         splitter = Splitter(self.sample_csv, new_output_dir)
         
@@ -214,7 +243,9 @@ class TestSplitterByRows:
         assert os.path.exists(new_output_dir)
     
     def test_by_rows_memory_efficiency(self):
-        """Test memory efficiency with larger file (integration test)."""
+        """
+        Test memory efficiency with larger file (integration test).
+        """
         # Create a larger CSV for memory testing
         large_csv = os.path.join(self.test_dir, "large.csv")
         self.create_large_csv(large_csv, 1000)  # 1000 rows
@@ -225,22 +256,7 @@ class TestSplitterByRows:
         # Should create 10 files
         large_files = len([f for f in os.listdir(self.test_dir) if f.startswith("large")])
         nb_output_files_expected = 10
-        assert large_files == nb_output_files_expected + 1 # adding input file
-    
-    def create_large_csv(self, filepath, num_rows):
-        """Create a larger CSV file for testing."""
-        with open(filepath, 'w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(['ID', 'Name', 'Age', 'City', 'Country', 'Salary'])
-            for i in range(1, num_rows + 1):
-                writer.writerow([
-                    i, 
-                    f'Person_{i}', 
-                    20 + (i % 50), 
-                    f'City_{i % 10}',
-                    f'Country_{i % 5}',
-                    30000 + (i * 100)
-                ])
+        assert large_files == nb_output_files_expected + 1 # adding input file 
 
 
 if __name__ == "__main__":

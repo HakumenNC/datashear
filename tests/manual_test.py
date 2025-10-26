@@ -13,7 +13,7 @@ def test_manual():
     """Test manuel de la méthode by_rows"""
     
     # Chemin vers le fichier de test
-    input_file = os.path.join(os.path.dirname(__file__), 'input/MOCK_DATA_sm.csv')
+    input_file = os.path.join(os.path.dirname(__file__), 'input/MOCK_DATA_SM.csv')
     output_dir = os.path.join(os.path.dirname(__file__), 'output')
     
     # Créer le répertoire de sortie s'il n'existe pas

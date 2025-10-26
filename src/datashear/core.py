@@ -1,5 +1,6 @@
 import os
 import csv
+import io
 from .util import Util
 
 
@@ -55,7 +56,7 @@ class Splitter:
                         current_file = open(output_path, 'w', newline='', encoding='utf-8')
                         current_writer = csv.writer(current_file)
 
-                        if repeat_header: current_writer.writerow(header)
+                        if repeat_header or output_index == 1: current_writer.writerow(header)
 
                     current_writer.writerow(row)
                     row_count += 1               
@@ -66,6 +67,63 @@ class Splitter:
                         output_index += 1
                         current_file.close()
                         current_file = None
+                
+            finally:
+                if current_file:
+                    current_file.close()
+                    current_file = None
+
+
+    def by_size(self, size: int, repeat_header: bool = True):
+        if size <= 0: raise ValueError("size per file must be greater than 0")
+
+        with open(self.input_file, 'r', newline='', encoding='utf-8') as file:
+            reader = csv.reader(file)
+
+            try: header = next(reader)
+            except: raise ValueError('CSV file is empty')
+
+            output_index = 1
+            current_size = 0
+            current_file = None
+            current_writer = None
+            header_size = 0
+
+            size_buffer = io.StringIO()
+            size_writer = csv.writer(size_buffer)
+
+            if repeat_header:
+                header_size = Util.get_row_size(header, size_buffer, size_writer)
+
+            try:
+                for row in reader:
+                    row_size = Util.get_row_size(row, size_buffer, size_writer)
+
+                    if current_file is None or (current_size + row_size > size and current_size > 0):
+                        if current_file: 
+                            current_file.close()
+                            Util.show_memory_usage()
+                            output_index += 1
+
+                        output_filename = Util.get_output_filename(
+                            self.input_file,
+                            output_index,
+                            self.output_prefix,
+                            self.output_base_filename,
+                            self.output_sufix
+                        )
+
+                        output_path = os.path.join(self.output_dir, output_filename)
+                        current_file = open(output_path, 'w', newline='', encoding='utf-8')
+                        current_writer = csv.writer(current_file)
+
+                        current_size = 0
+                        if repeat_header or output_index == 1:
+                            current_writer.writerow(header)
+                            current_size += header_size
+
+                    current_writer.writerow(row)
+                    current_size += row_size
                 
             finally:
                 if current_file:
